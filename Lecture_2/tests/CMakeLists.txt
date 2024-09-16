@@ -31,7 +31,6 @@ target_link_libraries(runDocTests image_processor ${OpenCV_LIBS})
 
 # Add testing
 if (WITH_TESTS)
-    enable_testing() # option responsible for test target in make
     add_test(NAME test_gtest
              COMMAND runGTests)
     add_test(NAME test_doctest
