@@ -35,13 +35,20 @@ add_custom_target(
 
 # Add a custom target to build the Python shared library
 add_custom_target(build_python_shared_library
-    COMMAND ${Python3_EXECUTABLE} src/python/setup.py build_ext --inplace
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/src/python/setup.py build_ext --inplace
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Building Python shared library using setup.py"
 )
 
+# Generate configuration file
+set (LD_PATH ${CMAKE_CURRENT_BINARY_DIR})
+configure_file (src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
+
 # Add the executable
-add_executable(run_inference src/main.cpp)
+add_executable(run_inference src/main.cpp ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
+
+# Add the directory with config
+target_include_directories(run_inference PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include/)
 
 # Install Python packages for shared library
 add_dependencies(run_inference install_python_packages)
