@@ -16,7 +16,7 @@ include(FetchContent)
 FetchContent_Declare(
     doctest
     GIT_REPOSITORY https://github.com/doctest/doctest.git
-    GIT_TAG v2.4.9
+    GIT_TAG v2.4.11
 )
 FetchContent_MakeAvailable(doctest)
 include_directories(${doctest_SOURCE_DIR}/doctest)
@@ -29,4 +29,11 @@ target_link_libraries(runGTests image_processor gtest gtest_main ${OpenCV_LIBS})
 add_executable(runDocTests test_image_processor_doctest.cpp)
 target_link_libraries(runDocTests image_processor ${OpenCV_LIBS})
 
-
+# Add testing
+if (WITH_TESTS)
+    enable_testing() # option responsible for test target in make
+    add_test(NAME test_gtest
+             COMMAND runGTests)
+    add_test(NAME test_doctest
+             COMMAND runDocTests)
+endif()
