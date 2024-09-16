@@ -31,7 +31,7 @@ std::vector<std::vector<float>> run_inference(const std::string& image_path) {
     
     // Add the directory containing the 'model_inference' module to the Python path
     PyObject* sys_path = PySys_GetObject("path");
-    PyList_Append(sys_path, PyUnicode_FromString(LD_PATH));  // Assuming .so file is in 'src' directory
+    PyList_Append(sys_path, PyUnicode_FromString(LD_PATH));  // .so file path
 
     PyObject* pName = PyUnicode_DecodeFSDefault("model_inference");  // Module name
     PyObject* pModule = PyImport_Import(pName);
