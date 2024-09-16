@@ -23,6 +23,16 @@ include_directories(
     ${NumPy_INCLUDE_DIR}  # Include the NumPy directory
 )
 
+# Set the path to your requirements.txt file
+set(REQUIREMENTS_FILE "${CMAKE_SOURCE_DIR}/src/python/requirements.txt")
+
+# Add a custom target to install Python packages using pip3
+add_custom_target(
+    install_python_packages
+    COMMAND ${CMAKE_COMMAND} -E echo "Installing Python packages from ${REQUIREMENTS_FILE}..."
+    COMMAND pip3 install -r ${REQUIREMENTS_FILE}
+)
+
 # Add a custom target to build the Python shared library
 add_custom_target(build_python_shared_library
     COMMAND ${Python3_EXECUTABLE} src/python/setup.py build_ext --inplace
@@ -32,6 +42,9 @@ add_custom_target(build_python_shared_library
 
 # Add the executable
 add_executable(run_inference src/main.cpp)
+
+# Install Python packages for shared library
+add_dependencies(run_inference install_python_packages)
 
 # Make the executable dependent on the Python shared library
 add_dependencies(run_inference build_python_shared_library)

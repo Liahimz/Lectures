@@ -1,0 +1,4 @@
+setuptools
+Cython
+numpy
+torch -f https://download.pytorch.org/whl/cpu
