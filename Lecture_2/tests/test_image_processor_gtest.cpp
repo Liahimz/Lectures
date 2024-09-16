@@ -1,3 +1,4 @@
+#include <string>
 #include <gtest/gtest.h>
 #include "image_processor.h"
 
@@ -8,4 +9,9 @@ TEST(ImageProcessorTest, ConvertToGrayscale) {
     ASSERT_EQ(grayscaleImage.type(), CV_8UC1);
     ASSERT_EQ(grayscaleImage.rows, colorImage.rows);
     ASSERT_EQ(grayscaleImage.cols, colorImage.cols);
+    ASSERT_NE(grayscaleImage.type(), CV_8UC3);
+    ASSERT_TRUE(grayscaleImage.rows == 100);
+    std::string str("xyz");
+    str += "ABC";
+    ASSERT_STRCASEEQ(str.c_str(), "XYZabc");
 }
