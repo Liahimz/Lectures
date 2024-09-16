@@ -14,9 +14,9 @@ option(WITH_TESTS "Turn on testing" ON)
 if (WITH_TESTS)
 	# option responsible for target "test" in make
 	enable_testing()
-    message("Tests are enabled")
+    message(STATUS "Tests are enabled")
 else()
-    message("Tests are disabled")
+    message(STATUS "Tests are disabled")
 endif()
 
 # Add subdirectories
