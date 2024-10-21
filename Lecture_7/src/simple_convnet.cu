@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <random>
 #include <opencv2/opencv.hpp>
 #include <cuda_runtime.h>
 
@@ -20,6 +21,14 @@ __global__ void conv2d(float* input, float* kernel, float* output, int inputWidt
             }
         }
         output[row * outputWidth + col] = sum;
+    }
+}
+
+// CUDA kernel for ReLU activation
+__global__ void reluActivation(float* data, int size) {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+        if (data[idx] < 0) data[idx] = 0;
     }
 }
 
@@ -44,12 +53,20 @@ void convNet(float* input, float* kernel, float* convOutput, float* fcWeights, f
     dim3 threadsPerBlock(16, 16);
     dim3 blocksPerGrid((outputWidth + threadsPerBlock.x - 1) / threadsPerBlock.x,
                        (outputHeight + threadsPerBlock.y - 1) / threadsPerBlock.y);
-    conv2d<<<blocksPerGrid, threadsPerBlock>>>(input, kernel, convOutput, inputWidth, inputHeight, kernelWidth, kernelHeight, outputWidth, outputHeight);
+    conv2d<<<blocksPerGrid, threadsPerBlock>>>(input, kernel, convOutput,
+        inputWidth, inputHeight, kernelWidth, kernelHeight, outputWidth, outputHeight);
+
+    // ReLU activation
+    int convOutputSize = outputWidth * outputHeight;
+    int threadsPerBlockReLU = 256;
+    int blocksPerGridReLU = (convOutputSize + threadsPerBlockReLU - 1) / threadsPerBlockReLU;
+    reluActivation<<<blocksPerGridReLU, threadsPerBlockReLU>>>(convOutput, convOutputSize);
 
     // Fully connected layer kernel
     int threadsPerBlockFC = 256;
     int blocksPerGridFC = (fcOutputSize + threadsPerBlockFC - 1) / threadsPerBlockFC;
-    linearLayer<<<blocksPerGridFC, threadsPerBlockFC>>>(convOutput, fcWeights, fcBias, finalOutput, fcInputSize, fcOutputSize);
+    linearLayer<<<blocksPerGridFC, threadsPerBlockFC>>>(convOutput, fcWeights, fcBias,
+        finalOutput, fcInputSize, fcOutputSize);
 }
 
 int main() {
@@ -62,7 +79,7 @@ int main() {
 
     // Resize image if necessary (should be 28x28)
     int inputWidth = 28, inputHeight = 28;
-    if (img.size().width != 28 || img.size().height != 28) {
+    if (img.cols != 28 || img.rows != 28) {
         cv::resize(img, img, cv::Size(28, 28));
     }
 
@@ -80,13 +97,31 @@ int main() {
 
     // Fully connected layer dimensions
     int fcInputSize = outputWidth * outputHeight;
-    int fcOutputSize = 10;  // 10 output classes (for digit classification)
+    int fcOutputSize = 10;  // 10 output classes (for digits 0-9)
 
-    // Allocate memory for kernel, convolution output, weights, bias, and final output
-    std::vector<float> kernel(kernelWidth * kernelHeight, 0.1f);  // Simple 5x5 kernel with 0.1 values
+    // Random number generation
+    std::default_random_engine generator;
+    std::normal_distribution<float> distribution(0.0f, 0.1f);  // Mean 0, stddev 0.1
+
+    // Initialize kernel with random values
+    std::vector<float> kernel(kernelWidth * kernelHeight);
+    for (auto& weight : kernel) {
+        weight = distribution(generator);
+    }
+
     std::vector<float> convOutput(outputWidth * outputHeight, 0.0f);  // Convolution output
-    std::vector<float> fcWeights(fcOutputSize * fcInputSize, 0.1f);  // Fully connected weights
-    std::vector<float> fcBias(fcOutputSize, 0.0f);  // Fully connected biases
+
+    // Initialize fully connected layer weights and biases with random values
+    std::vector<float> fcWeights(fcOutputSize * fcInputSize);
+    for (auto& weight : fcWeights) {
+        weight = distribution(generator);
+    }
+
+    std::vector<float> fcBias(fcOutputSize);
+    for (auto& bias : fcBias) {
+        bias = distribution(generator);
+    }
+
     std::vector<float> finalOutput(fcOutputSize, 0.0f);  // Final output
 
     // Device memory pointers
@@ -107,13 +142,26 @@ int main() {
     cudaMemcpy(d_fcBias, fcBias.data(), fcBias.size() * sizeof(float), cudaMemcpyHostToDevice);
 
     // Perform convolution and fully connected layer
-    convNet(d_input, d_kernel, d_convOutput, d_fcWeights, d_fcBias, d_finalOutput, inputWidth, inputHeight, kernelWidth, kernelHeight, outputWidth, outputHeight, fcInputSize, fcOutputSize);
+    convNet(d_input, d_kernel, d_convOutput, d_fcWeights, d_fcBias, d_finalOutput,
+            inputWidth, inputHeight, kernelWidth, kernelHeight, outputWidth, outputHeight,
+            fcInputSize, fcOutputSize);
 
     // Copy final output back to host
     cudaMemcpy(finalOutput.data(), d_finalOutput, finalOutput.size() * sizeof(float), cudaMemcpyDeviceToHost);
 
+    // Apply softmax to interpret outputs as probabilities
+    float maxVal = *std::max_element(finalOutput.begin(), finalOutput.end());
+    float sum = 0.0f;
+    for (auto& val : finalOutput) {
+        val = std::exp(val - maxVal);  // For numerical stability
+        sum += val;
+    }
+    for (auto& val : finalOutput) {
+        val /= sum;
+    }
+
     // Display final output (predictions)
-    std::cout << "Predictions:" << std::endl;
+    std::cout << "Predictions (probabilities):" << std::endl;
     for (int i = 0; i < fcOutputSize; ++i) {
         std::cout << "Class " << i << ": " << finalOutput[i] << std::endl;
     }
@@ -128,4 +176,3 @@ int main() {
 
     return 0;
 }
-
