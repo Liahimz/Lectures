@@ -138,7 +138,7 @@ void convNet(float* input, float* kernels, float* convOutput, float* fcWeights, 
 
 int main() {
     // Load grayscale image using OpenCV (e.g., MNIST image)
-    cv::Mat img = cv::imread("/home/mzingerenko/Desktop/Lectures/Lecture_7/data/mnist_img.png", cv::IMREAD_GRAYSCALE);
+    cv::Mat img = cv::imread("/home/mzingerenko/Desktop/Lectures/Lecture_7/data/mnist_img8.jpg", cv::IMREAD_GRAYSCALE);
     if (img.empty()) {
         std::cerr << "Image not found!" << std::endl;
         return -1;
@@ -167,38 +167,41 @@ int main() {
     int fcInputSize = outputWidth * outputHeight * numKernels;
     int fcOutputSize = 10;  // 10 output classes (for digits 0-9)
 
-    // Random number generation
-    std::default_random_engine generator;
-    std::normal_distribution<float> distribution(0.0f, 0.1f);  // Mean 0, stddev 0.1
+    // // Random number generation
+    // std::default_random_engine generator;
+    // std::normal_distribution<float> distribution(0.0f, 0.1f);  // Mean 0, stddev 0.1
 
-    // Initialize kernels for 6 output channels with random values
-    std::vector<float> kernels(kernelWidth * kernelHeight * numKernels);
-    for (auto& weight : kernels) {
-        weight = distribution(generator);
-    }
-    // Initialize fully connected layer weights and biases with random values
-    std::vector<float> fcWeights(fcOutputSize * fcInputSize);
-    for (auto& weight : fcWeights) {
-        weight = distribution(generator);
-    }
+    // // Initialize kernels for 6 output channels with random values
+    // std::vector<float> kernels(kernelWidth * kernelHeight * numKernels);
+    // for (auto& weight : kernels) {
+    //     weight = distribution(generator);
+    // }
+    // // Initialize fully connected layer weights and biases with random values
+    // std::vector<float> fcWeights(fcOutputSize * fcInputSize);
+    // for (auto& weight : fcWeights) {
+    //     weight = distribution(generator);
+    // }
 
-    std::vector<float> fcBias(fcOutputSize);
-    for (auto& bias : fcBias) {
-        bias = distribution(generator);
-    }
+    // std::vector<float> fcBias(fcOutputSize);
+    // for (auto& bias : fcBias) {
+    //     bias = distribution(generator);
+    // }
 
 
-    // std::string weightsPath = "/home/mzingerenko/Desktop/Lectures/Lecture_7/data/";
+    std::string weightsPath = "/home/mzingerenko/Desktop/Lectures/Lecture_7/data/";
 
-    // int32_t kernelSize = kernelWidth * kernelHeight * numKernels;
-    // // Load kernel weights
-    // readKernelWeights(weightsPath + "conv_kernels.txt", kernels, kernelSize);
+    int32_t kernelSize = kernelWidth * kernelHeight * numKernels;
+    // Load kernel weights
+    std::vector<float> kernels;
+    readKernelWeights(weightsPath + "conv_kernels.txt", kernels, kernelSize);
 
-    // int32_t fcWeightSize = fcOutputSize * fcInputSize;
-    // int32_t fcBiasSize = fcOutputSize;
-    // // Load fully connected layer weights and biases
-    // readFullyConnectedWeights(weightsPath + "fc_weights.txt", weightsPath + "fc_biases.txt", fcWeights, fcBias, fcWeightSize, fcBiasSize);
-
+    int32_t fcWeightSize = fcOutputSize * fcInputSize;
+    int32_t fcBiasSize = fcOutputSize;
+    // Load fully connected layer weights and biases
+    std::vector<float> fcBias;
+    std::vector<float> fcWeights;
+    readFullyConnectedWeights(weightsPath + "fc_weights.txt", weightsPath + "fc_biases.txt", fcWeights, fcBias, fcWeightSize, fcBiasSize);
+    
     std::vector<float> convOutput(outputWidth * outputHeight * numKernels, 0.0f);  // Convolution output
 
     std::vector<float> finalOutput(fcOutputSize, 0.0f);  // Final output
