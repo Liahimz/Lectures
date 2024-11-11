@@ -1,5 +1,6 @@
 services:
   server:
+    image: server
     build:
       context: .
       dockerfile: docker/Dockerfile.server
@@ -7,12 +8,12 @@ services:
       - build_output:/app/build
     ports:
       - "8080:8080"
-    restart: always
     depends_on:
       - builder
     command: ["/app/build/image_server"]
 
   builder:
+    image: builder
     build:
       context: .
       dockerfile: docker/Dockerfile.builder
@@ -21,6 +22,7 @@ services:
     command: ["cmake", "--build", "/app/build"]
 
   web:
+    image: web
     build:
       context: .
       dockerfile: docker/Dockerfile.web
