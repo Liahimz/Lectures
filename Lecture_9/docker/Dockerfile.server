@@ -1,0 +1,17 @@
+# Dockerfile.server
+FROM ubuntu:20.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+# Install runtime dependencies
+RUN apt-get update && \
+    apt-get install -y libopencv-dev libssl-dev libcpprest-dev && \
+    apt-get clean
+
+# Set working directory
+WORKDIR /app
+
+# Copy the compiled binary from the builder container
+COPY --from=builder /app/build/image_server /app/
+
+# Run the server
+CMD ["./image_server"]

@@ -1,0 +1,34 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.server
+    volumes:
+      - build_output:/app/build
+    ports:
+      - "8080:8080"
+    restart: always
+    depends_on:
+      - builder
+    command: ["/app/build/image_server"]
+
+  builder:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.builder
+    volumes:
+      - build_output:/app/build
+    command: ["cmake", "--build", "/app/build"]
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.web
+    ports:
+      - "8081:80"
+    volumes:
+      - ./index.html:/app/index.html
+
+# Define the named volume
+volumes:
+  build_output:
