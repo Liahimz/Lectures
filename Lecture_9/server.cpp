@@ -9,12 +9,17 @@ using namespace web::http::experimental::listener;
 void handle_options(http_request request) {
     http_response response(status_codes::OK);
     response.headers().add("Access-Control-Allow-Origin", "*");
-    response.headers().add("Access-Control-Allow-Methods", "POST, OPTIONS");
-    response.headers().add("Access-Control-Allow-Headers", "Content-Type");
+    response.headers().add("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE,PATCH");
+    response.headers().add("Access-Control-Allow-Headers", "Authorization,Accept,Origin,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range");
     request.reply(response);
 }
 
 void handle_post(http_request request) {
+    http_response response(status_codes::OK);
+    response.headers().add("Access-Control-Allow-Origin", "*");
+    response.headers().add("Access-Control-Allow-Methods", "GET,POST,OPTIONS,PUT,DELETE,PATCH");
+    response.headers().add("Access-Control-Allow-Headers", "Authorization,Accept,Origin,DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range");
+
     auto content_type = request.headers().content_type();
     
     // Check if the content type is "image/jpeg" or similar
@@ -39,6 +44,8 @@ void handle_post(http_request request) {
     } else {
         request.reply(status_codes::UnsupportedMediaType);
     }
+
+    request.reply(response);
 }
 
 int main() {

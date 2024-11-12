@@ -6,11 +6,14 @@ services:
       dockerfile: docker/Dockerfile.server
     volumes:
       - build_output:/app/build
+    # network_mode: host
     ports:
       - "8080:8080"
     depends_on:
       - builder
-    command: ["/app/build/image_server"]
+    networks:
+      - app-network
+    command: ["bash", "-c", "./image_server; sleep infinity"]
 
   builder:
     image: builder
@@ -26,10 +29,18 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.web
+    # network_mode: host
     ports:
       - "8081:80"
     volumes:
       - ./index.html:/app/index.html
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
 
 # Define the named volume
 volumes:
