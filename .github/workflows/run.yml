@@ -27,9 +27,9 @@ jobs:
       # Runs a single command using the runners shell
       - name: Configure cmake
         run: cmake -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=ON -S Lecture_10/ -B ${{github.workspace}}/cmake-build-release
-      
+
       - name: Build
         run: cmake --build ${{github.workspace}}/cmake-build-release
 
-      - name: Run tests
+      - name: Tests
       	run: ${{github.workspace}}/cmake-build-release/tests/test_gtest
