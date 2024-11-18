@@ -39,3 +39,8 @@ jobs:
 
       - name: Run DocTests
         run: ${{github.workspace}}/cmake-build-release/tests/runDocTests
+
+  process:
+    steps:
+      - name: Run Process
+        run: ${{github.workspace}}/cmake-build-release/src/process
