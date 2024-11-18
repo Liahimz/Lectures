@@ -34,5 +34,8 @@ jobs:
       - name: Build
         run: cmake --build ${{github.workspace}}/cmake-build-release
 
-      - name: Run Tests
-        run: ${{github.workspace}}/cmake-build-release/tests/test_gtest
+      - name: Run Google Tests
+        run: ${{github.workspace}}/cmake-build-release/tests/runGTests
+
+      - name: Run DocTests
+        run: ${{github.workspace}}/cmake-build-release/tests/runDocTests
