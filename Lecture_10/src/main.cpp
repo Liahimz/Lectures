@@ -11,12 +11,8 @@ int main(int argc, char** argv) {
         std::cerr << "Error: Could not load image!" << std::endl;
         return -1;
     }
-    cv::imshow("Input Image", image);
-    // cv::waitKey(0);
 
     cv::Mat grayscaleImage = ImageProcessor::convertToGrayscale(image);
-    cv::imshow("Grayscale Image", grayscaleImage);
-    // cv::waitKey(0);
     cv::imwrite("grayscale_input.png", grayscaleImage);
 
     return 0;
