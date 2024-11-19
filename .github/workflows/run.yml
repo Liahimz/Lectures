@@ -34,7 +34,7 @@ jobs:
       - name: Copy Image
         run: cp Lecture_10/zidane.jpg ${{github.workspace}}/cmake-build-release/
 
-      - name: Build
+      - name: Build Project
         run: cmake --build ${{github.workspace}}/cmake-build-release
 
       - name: Run Google Tests
